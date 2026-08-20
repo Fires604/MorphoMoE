@@ -1,0 +1,8 @@
+# Environment reported for the submitted MorphoMoE experiments
+torch==2.0.0
+torchvision==0.15.1
+mamba-ssm==2.2.2
+numpy
+opencv-python
+PyYAML
+tqdm

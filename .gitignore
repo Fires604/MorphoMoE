@@ -1,0 +1,22 @@
+# Datasets and experiment artifacts
+data/
+outputs/
+checkpoints/
+results/
+runs/
+*.pth
+*.pt
+*.ckpt
+
+# Python and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.env
+
+# IDE and operating-system metadata
+.vscode/
+.idea/
+.DS_Store

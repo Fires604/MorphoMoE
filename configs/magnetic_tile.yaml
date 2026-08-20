@@ -1,0 +1,19 @@
+# Supply your own externally defined directories. No partition is bundled.
+train_image_dir: null
+train_mask_dir: null
+val_image_dir: null
+val_mask_dir: null
+num_classes: 6
+
+epochs: 200
+batch_size: 16
+learning_rate: 0.0001
+optimizer: adam
+weight_decay: 0.00001
+scheduler: cosine
+min_lr: 0.000001
+early_stopping_patience: 0
+
+num_workers: 4
+seed: 42
+output_dir: outputs
