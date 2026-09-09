@@ -12,7 +12,7 @@ optimizer: adam
 weight_decay: 0.00001
 scheduler: cosine
 min_lr: 0.000001
-early_stopping_patience: 0
+early_stopping_patience: 30
 
 num_workers: 4
 seed: 42

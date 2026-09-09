@@ -1,22 +1,24 @@
 # MorphoMoE
 
-Official implementation of MorphoMoE.
+Official implementation of **MorphoMoE: Resource-Efficient Morphology-Oriented Mixture of Experts for Robust Surface Defect Segmentation in Industrial IoT**.
+
+This work is **currently under review**.
 
 ## Overview
 
-MorphoMoE is a morphology-oriented heterogeneous mixture of experts network for steel surface defect segmentation. It combines an LPDM-based shared encoder, three morphology-specialized experts, and a learned gating network to produce pixel-wise segmentation predictions.
+MorphoMoE is a resource-efficient, morphology-oriented heterogeneous mixture-of-experts network for steel surface defect segmentation in Industrial IoT quality inspection. An LPDM-based shared encoder, three morphology-specialized experts, and a gating network produce pixel-wise defect maps under a compact parameter budget.
 
 ## Architecture
 
 MorphoMoE consists of four main components:
 
-1. An LPDM-based shared encoder.
+1. A Local-Preserving Direction-Aware Mamba-CNN (LPDM) shared encoder.
 2. Morphology-oriented heterogeneous experts:
-   - SDE for scale diversity;
-   - RDE for directional representation;
-   - CSE for channel-wise semantic enhancement.
-3. A gating network that adaptively combines expert features.
-4. A U-Net decoder that produces the segmentation logits.
+   - **SDE** (Small Defect Expert) for local details and fine-grained structures;
+   - **RDE** (Regional Defect Expert) for regional context and broad defect areas;
+   - **CSE** (Complex Shape Expert) for irregular geometry and weak boundaries.
+3. A gating network that fuses expert outputs with Softmax-normalized, input-dependent weights.
+4. A shared U-Net decoder that produces the segmentation logits.
 
 ## Environment
 
@@ -32,30 +34,21 @@ The repository uses Python 3.8+ and the following core packages:
 - torchvision 0.15.1
 - mamba-ssm 2.2.2
 
-A CUDA-enabled PyTorch installation is recommended for training. Install the PyTorch and `mamba-ssm` builds that are compatible with your local CUDA environment.
+A CUDA-enabled PyTorch installation is recommended for training. Install the PyTorch and `mamba-ssm` builds that are compatible with your local CUDA environment. The paper experiments used Python 3.8.10, CUDA 11.8, and a single NVIDIA RTX 4090.
 
 ## Dataset Preparation
 
-## Dataset Preparation
+This repository does not include the original dataset files. Obtain the public sources below, then set image and mask directories in the YAML configs or via command-line arguments.
 
-Due to the size of the datasets and distribution considerations, this repository does not include the original dataset files.
+- **NEU-Seg**: https://github.com/DHW-Master/NEU_Seg  
+  4,470 images of size 200x200. The original split has 3,630 training images and 840 test images. Following the paper, further split the original training set into **2,904 training** and **726 validation** images. The test set (840 images) is held out for final reporting. Classes: Background, Inclusion, Patch, and Scratch (4 classes).
 
-The supported datasets can be obtained from the following public sources:
+- **Magnetic Tile Dataset**: https://github.com/abin24/Magnetic-tile-defect-datasets.  
+  1,344 images (392 defective, 952 normal). Resize all images to 256x256. Classes: Blowhole, Crack, Break, Fray, Uneven, and Free (6 classes).
 
-- **NEU-Seg**
-  
-  Dataset repository:
-  https://github.com/DHW-Master/NEU_Seg
+**Augmentation.** In the paper, random augmentation is applied during training and disabled at test time. The released training script does not attach a default `transform`; pass one to the dataset class if you need to match the paper protocol.
 
-- **Magnetic Tile Dataset**
-  
-  Dataset repository:
-  https://github.com/abin24/Magnetic-tile-defect-datasets.
-
-
-After downloading the datasets, please organize the dataset paths according to your local environment and specify the corresponding image and mask directories through the YAML configuration files or command-line arguments.
-
-The repository only provides dataset loading interfaces and does not include the original dataset files.
+**Early stopping.** Training runs for at most 200 epochs and stops if validation mIoU does not improve for **30** consecutive epochs (`early_stopping_patience: 30` in `configs/`).
 
 ## Training
 
@@ -92,7 +85,7 @@ Configuration files are stored in `configs/`:
 - `configs/neu.yaml`
 - `configs/magnetic_tile.yaml`
 
-They provide placeholders for dataset directory paths and define training parameters such as epochs, batch size, learning rate, optimizer, scheduler, random seed, and output directory. The current MorphoMoE architecture settings use the defaults defined in `models/morphomoe.py`.
+They provide placeholders for dataset directory paths and define training parameters such as epochs, batch size, learning rate, optimizer, scheduler, early-stopping patience, random seed, and output directory. The current MorphoMoE architecture settings use the defaults defined in `models/morphomoe.py`.
 
 ## Evaluation
 
@@ -104,4 +97,11 @@ Validation is performed during training. The reported segmentation metrics are:
 
 ## Results
 
-Detailed experimental results are reported in the corresponding paper.
+On the paper's test protocol, MorphoMoE uses **1.48 M** parameters and reports:
+
+| Dataset | mIoU | mDice | Acc |
+|---|---|---|---|
+| NEU-Seg | 89.85% | 94.56% | 98.47% |
+| Magnetic Tile | 79.18% | 87.95% | 99.42% |
+
+Further comparisons, expert ablations, and robustness results under Gaussian blur and contrast reduction are given in the paper.
